@@ -26,7 +26,9 @@ import {
   Wrench,
 } from "lucide-react";
 import NavBar from "../components/NavBar";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export default function Homepage() {
   const contactRef = useRef(null);
@@ -34,20 +36,24 @@ export default function Homepage() {
   const facilitiesRef = useRef(null);
   const roomsRef = useRef(null);
   const aboutRef = useRef(null);
-  const scrollToSection = (sectionRef) => {
-    sectionRef.current.scrollIntoView({ behavior: "smooth" });
-  };
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash === "#home" && homeRef.current) {
+      homeRef.current.scrollIntoView({ behavior: "smooth" });
+    } else if (location.hash === "#facilities" && facilitiesRef.current) {
+      facilitiesRef.current.scrollIntoView({ behavior: "smooth" });
+    } else if (location.hash === "#rooms" && roomsRef.current) {
+      roomsRef.current.scrollIntoView({ behavior: "smooth" });
+    } else if (location.hash === "#about" && aboutRef.current) {
+      aboutRef.current.scrollIntoView({ behavior: "smooth" });
+    } else if (location.hash === "#contact" && contactRef.current) {
+      contactRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [location]);
   return (
     <div ref={homeRef} className="min-h-screen bg-black text-gray-300">
-      {/* Header */}
-      <NavBar
-        scrollToSection={scrollToSection}
-        contactRef={contactRef}
-        roomsRef={roomsRef}
-        aboutRef={aboutRef}
-        homeRef={homeRef}
-        facilitiesRef={facilitiesRef}
-      />
+      <NavBar />
       {/* Hero Section */}
       <section className="relative flex min-h-screen items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
@@ -63,7 +69,10 @@ export default function Homepage() {
             Experience luxury living with comfort, convenience, and an active
             lifestyle. Your perfect PG solution awaits.
           </p>
-          <div className="flex flex-col justify-center gap-4 sm:flex-row">
+          <Link
+            to="/signup"
+            className="flex flex-col justify-center gap-4 sm:flex-row"
+          >
             <Button
               size="xl"
               variant="outline"
@@ -71,7 +80,7 @@ export default function Homepage() {
             >
               Get Started
             </Button>
-          </div>
+          </Link>
         </div>
         <div className="absolute bottom-0 left-0 right-0 z-20 h-24 bg-gradient-to-t from-black to-transparent"></div>
       </section>
