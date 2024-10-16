@@ -2,9 +2,9 @@ import express from 'express';
 import zod from 'zod';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
-import authMiddleware from './middleware';
-import mongoose from 'mongoose';
-import { Member } from '../db';
+// import authMiddleware from './middleware';
+// import mongoose from 'mongoose';
+import { Member } from '../db.js';
 dotenv.config({ path: './../.env' });
 const JWT_SECRET = process.env.JWT_SECRET;
 const router = express.Router();
@@ -48,4 +48,6 @@ router.post('/signin', async (req, res) => {
   });
 });
 
-router.get('/');
+// router.get('/');
+
+export default router;

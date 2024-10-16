@@ -138,7 +138,7 @@ const memberSchema = mongoose.Schema({
     minLength: 12,
     maxLength: 16,
   },
-  joined: Date,
+  joined: String,
   roomAlloted: {
     type: mongoose.Schema.ObjectId,
   },
@@ -150,12 +150,7 @@ const roomSchema = mongoose.Schema({
   roomNo: String,
   available: Boolean,
   price: String,
-  vacateDate: Date,
-  renter: [
-    {
-      type: mongoose.Schema.ObjectId,
-    },
-  ],
+  vacateDate: String,
 });
 
 const Admin = mongoose.model('Admin', adminSchema);

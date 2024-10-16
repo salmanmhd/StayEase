@@ -125,6 +125,7 @@ const addRenterSchema = zod.object({
 router.post('/add-renter', authMiddleware, async (req, res) => {
   const body = req.body;
   const zodSchema = addRenterSchema.safeParse(body);
+  console.log(zodSchema.error);
   const { success } = zodSchema;
   if (!success) {
     return res.status(400).json({
@@ -132,7 +133,7 @@ router.post('/add-renter', authMiddleware, async (req, res) => {
     });
   }
 
-  const existingMember = Member.findOne({
+  const existingMember = await Member.findOne({
     username: body.username,
     fullName: body.fullName,
   });
@@ -140,6 +141,17 @@ router.post('/add-renter', authMiddleware, async (req, res) => {
   if (existingMember) {
     res.status(400).json({
       msg: 'Member already exist',
+    });
+  }
+
+  const isRoomVacant = await Room.findOne({
+    roomNo: body.allotedRoom,
+    roomType: body.roomType,
+  });
+
+  if (isRoomVacant) {
+    return res.status(400).json({
+      msg: 'Room occupied, try vacant room',
     });
   }
 
@@ -156,6 +168,7 @@ router.post('/add-renter', authMiddleware, async (req, res) => {
     UID: body.UID,
     roomType: body.roomType,
     allotedRoom: body.allotedRoom,
+    profilePhoto: 'http://xsgames.co/randomusers/assets/avatars/female/12.jpg',
     joined: new Date().toLocaleDateString(),
   });
 
@@ -167,25 +180,25 @@ router.post('/add-renter', authMiddleware, async (req, res) => {
 
 const roomSchema = zod.object({
   roomType: zod.enum(['single', 'double', 'triple']),
-  floor: zod.number(),
-  roomNo: zod.number(),
+  floor: zod.string(),
+  roomNo: zod.string(),
   available: zod.boolean(),
   price: zod.string(),
   vacateDate: zod.string(),
-  renter: zod.string(),
 });
 
-router.post('add-room', authMiddleware, async (req, res) => {
+router.post('/add-room', authMiddleware, async (req, res) => {
   const body = req.body;
   const zodSchema = roomSchema.safeParse(body);
+  console.log(zodSchema.error);
   const { success } = zodSchema;
   if (!success) {
-    res.status(400).json({
-      msg: 'Please enter correct inputs',
+    return res.status(400).json({
+      msg: 'Bad Inputs',
     });
   }
 
-  const existingRoom = Room.findOne({
+  const existingRoom = await Room.findOne({
     roomNo: body.roomNo,
     floor: body.floor,
   });
@@ -203,12 +216,14 @@ router.post('add-room', authMiddleware, async (req, res) => {
     available: body.available,
     price: body.price,
     vacateDate: body.vacateDate,
-    renter: body.renter,
   });
-
-  return res.status(200).json({
-    msg: 'Room added successfully',
-  });
+  if (room) {
+    return res.status(200).json({
+      msg: 'Room added successfully',
+    });
+  } else {
+    console.log('there is some error');
+  }
 });
 
 export default router;
