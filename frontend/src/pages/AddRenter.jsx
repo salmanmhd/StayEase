@@ -14,16 +14,17 @@ import { Label } from "@/components/ui/label";
 
 export default function AddRenter() {
   const [formData, setFormData] = useState({
-    roomType: "",
-    firstName: "",
-    lastName: "",
+    username: "",
+    fullName: "",
     fatherName: "",
-    emergencyContact: "",
+    password: "",
+    contactNumber: "",
     permanentAddress: "",
-    mobileNumber: "",
-    parentMobileNumber: "",
-    currentRole: "",
+    emergencyContact: "",
     medicalIssues: "",
+    profession: "",
+    UID: "",
+    roomType: "",
     allotedRoom: "",
   });
 

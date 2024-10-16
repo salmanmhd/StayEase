@@ -67,6 +67,11 @@ const guestSchema = mongoose.Schema({
     minLength: 10,
     maxLength: 13,
   },
+  password: {
+    type: String,
+    required: true,
+    minLength: 6,
+  },
 });
 
 const memberSchema = mongoose.Schema({
@@ -106,22 +111,55 @@ const memberSchema = mongoose.Schema({
     minLength: 3,
     maxLength: 30,
   },
+  contactNumber: {
+    type: String,
+    required: true,
+    trim: true,
+    minLength: 10,
+    maxLength: 13,
+  },
+  emergencyContactNumber: {
+    type: String,
+    required: true,
+    trim: true,
+    minLength: 10,
+    maxLength: 13,
+  },
   password: {
     type: String,
     required: true,
     minLength: 6,
   },
-  profilePhoto: {},
-  aadharNumber: {
+  profilePhoto: String,
+  UID: {
     type: String,
     trim: true,
     required: true,
     minLength: 12,
     maxLength: 16,
   },
+  joined: Date,
+  roomAlloted: {
+    type: mongoose.Schema.ObjectId,
+  },
+});
+
+const roomSchema = mongoose.Schema({
+  roomType: String,
+  floor: String,
+  roomNo: String,
+  available: Boolean,
+  price: String,
+  vacateDate: Date,
+  renter: [
+    {
+      type: mongoose.Schema.ObjectId,
+    },
+  ],
 });
 
 const Admin = mongoose.model('Admin', adminSchema);
 const Guest = mongoose.model('Guest', guestSchema);
 const Member = mongoose.model('Member', memberSchema);
-export { Admin, Guest, Member };
+const Room = mongoose.model('Room', roomSchema);
+export { Admin, Guest, Member, Room };

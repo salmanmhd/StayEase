@@ -3,7 +3,7 @@ import zod from 'zod';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import authMiddleware from './middleware.js';
-import { Admin } from './../db.js';
+import { Admin, Member, Room } from './../db.js';
 dotenv.config({ path: './../.env' });
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -65,6 +65,149 @@ router.post('/signup', async (req, res) => {
 
   res.status(200).json({
     msg: 'Admin created successfully',
+    token,
+  });
+});
+
+router.post('/signin', async (req, re) => {
+  const body = req.body;
+  const zodSchema = signinSchema.safeParse(body);
+  const { success } = zodSchema;
+  if (!success) {
+    return res.status(400).json({
+      msg: 'Bad inputs, please enter correct details',
+    });
+  }
+
+  const user = Admin.findOne({
+    username: body.username,
+    password: body.password,
+  });
+
+  if (!user) {
+    res.status(400).json({
+      msg: 'You are not registered, sign up now',
+    });
+  }
+
+  const token = jwt.sign(
+    {
+      userId: user._id,
+    },
+    JWT_SECRET
+  );
+
+  res.status(200).json({
+    msg: 'Login successfull',
+    token,
+  });
+});
+
+const addRenterSchema = zod.object({
+  username: zod.string().email(),
+  fullName: zod.string(),
+  fatherName: zod.string(),
+  password: zod.string(),
+  contactNumber: zod
+    .string()
+    .min(10, 'contact number shoould be atleast 10 digit long'),
+  address: zod.string(),
+  emergencyContactNumber: zod
+    .string()
+    .min(10, 'contact number shoould be atleast 10 digit long'),
+  medicalIssues: zod.string(),
+  profession: zod.string(),
+  UID: zod.string().min(12, 'UID should be atleast 12 digit long'),
+  roomType: zod.enum(['single', 'double', 'triple']),
+  allotedRoom: zod.string(),
+});
+
+router.post('/add-renter', authMiddleware, async (req, res) => {
+  const body = req.body;
+  const zodSchema = addRenterSchema.safeParse(body);
+  const { success } = zodSchema;
+  if (!success) {
+    return res.status(400).json({
+      msg: 'Please enter correct inputs',
+    });
+  }
+
+  const existingMember = Member.findOne({
+    username: body.username,
+    fullName: body.fullName,
+  });
+
+  if (existingMember) {
+    res.status(400).json({
+      msg: 'Member already exist',
+    });
+  }
+
+  const user = await Member.create({
+    username: body.username,
+    fullName: body.fullName,
+    fatherName: body.fatherName,
+    password: body.password,
+    contactNumber: body.contactNumber,
+    address: body.address,
+    emergencyContactNumber: body.emergencyContactNumber,
+    medicalIssues: body.medicalIssues,
+    profession: body.profession,
+    UID: body.UID,
+    roomType: body.roomType,
+    allotedRoom: body.allotedRoom,
+    joined: new Date().toLocaleDateString(),
+  });
+
+  return res.status(200).json({
+    msg: 'Member added successfully',
+    name: user.fullName,
+  });
+});
+
+const roomSchema = zod.object({
+  roomType: zod.enum(['single', 'double', 'triple']),
+  floor: zod.number(),
+  roomNo: zod.number(),
+  available: zod.boolean(),
+  price: zod.string(),
+  vacateDate: zod.string(),
+  renter: zod.string(),
+});
+
+router.post('add-room', authMiddleware, async (req, res) => {
+  const body = req.body;
+  const zodSchema = roomSchema.safeParse(body);
+  const { success } = zodSchema;
+  if (!success) {
+    res.status(400).json({
+      msg: 'Please enter correct inputs',
+    });
+  }
+
+  const existingRoom = Room.findOne({
+    roomNo: body.roomNo,
+    floor: body.floor,
+  });
+
+  if (existingRoom) {
+    return res.status(400).json({
+      msg: 'Room already exist',
+    });
+  }
+
+  const room = await Room.create({
+    roomType: body.roomType,
+    floor: body.floor,
+    roomNo: body.roomNo,
+    available: body.available,
+    price: body.price,
+    vacateDate: body.vacateDate,
+    renter: body.renter,
+  });
+
+  return res.status(200).json({
+    msg: 'Room added successfully',
   });
 });
 
