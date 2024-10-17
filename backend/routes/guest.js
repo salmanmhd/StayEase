@@ -2,7 +2,8 @@ import zod from 'zod';
 import express from 'express';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
-import { Guest } from '../db.js';
+import { Guest, Room } from '../db.js';
+import authMiddleware from './middleware.js';
 const router = express.Router();
 dotenv.config({ path: './../env' });
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -45,6 +46,7 @@ router.post('/signup', async (req, res) => {
     fullName: body.fullName,
     password: body.password,
     contactNumber: body.contactNumber,
+    haveBooked: false,
   });
 
   const token = jwt.sign(
@@ -91,6 +93,29 @@ router.post('/signin', async (req, res) => {
     msg: 'signin successfull',
     token,
   });
+});
+
+router.get('/availability', authMiddleware, async (req, res) => {
+  try {
+    const rooms = await Room.find({});
+    const availableRooms = rooms.filter((room) => {
+      return room.available === true;
+    });
+
+    const availableToBookInAdvance = rooms.filter((room) => {
+      return room.available === false && room.vacateDate;
+    });
+
+    return res.status(200).json({
+      availableRooms,
+      availableToBookInAdvance,
+    });
+  } catch (error) {
+    console.error('Error fetching rooms', error);
+    return res.status(500).json({
+      msg: 'an error occured while fetching room availibility',
+    });
+  }
 });
 
 export default router;

@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import { boolean } from 'zod';
 
 dotenv.config({ path: './../.env' });
 const MONGO_URI = process.env.MONGO_URI;
@@ -60,7 +61,7 @@ const guestSchema = mongoose.Schema({
     minLength: 3,
     maxLength: 30,
   },
-  phoneNumber: {
+  contactNumber: {
     type: String,
     required: true,
     trim: true,
@@ -72,6 +73,7 @@ const guestSchema = mongoose.Schema({
     required: true,
     minLength: 6,
   },
+  haveBooke: Boolean,
 });
 
 const memberSchema = mongoose.Schema({
